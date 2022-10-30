@@ -6,7 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
-from sqlalchemy import create_engine, false, select, Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import create_engine, false, null, select, Table, Column, Integer, String, MetaData, ForeignKey
 import requests
 
 
@@ -28,8 +28,8 @@ users = Table ( 'users', meta,
 )
 nft = Table ( 'nft', meta,
     Column('nft_id', Integer,primary_key = True ),
-    Column('address', String(250),nullable = false,),
-    Column('info', String(250),nullable = false)
+    Column('address', String(250),nullable = false),
+    Column('info', String(1000),nullable = false)
 )
 
 engine = create_engine('postgresql+psycopg2://postgres:19Rjy0203@127.0.0.1:5432/user')
@@ -98,17 +98,27 @@ def index():
                      "X-API-Key": "SWnpmagdLrYt67aFhsaBRRzoubD59cdQkydkZLeljvVREBpWGmpLktfRLZXcvudp"
                 }
                 response = requests.get(url, headers=headers) 
-                #ins_nft_query = nft.insert().values(address = form.address.data,info = response)
-                #conn.execute(ins_nft_query)
-                print(response.text) 
+
+                ins_nft_query = nft.insert().values(address = form.address.data,info = response.text)
+                conn.execute(ins_nft_query)
+                 
+
                 nft_result =  nft.select().where(nft.c.address == form.address.data )
-                for row in nft_result:
-                    if row.username == form.address.data:
-                        '<h1>'+ response.text + '</h1>'
-                    else:
-                        ins_nft_query = nft.insert().values(address = form.address.data,info = response.text)  
-                        conn.execute(ins_nft_query) 
-                        '<h1>'+ response.text + '</h1>'  
+                result3 = conn.execute(nft_result)
+                for row3 in result3:
+                   if row3.address == form.address.data:
+                        return row3.info
+                       
+                return response.text      
+                
+                #nft_result =  nft.select().where(nft.c.address == form.address.data )
+                #for row in nft_result:
+                #    if row.address == form.address.data:
+                #        '<h1>'+ response.text + '</h1>'
+                #    else:
+                #        ins_nft_query = nft.insert().values(address = form.address.data,info = response.text)  
+                #        conn.execute(ins_nft_query) 
+                #        '<h1>'+ response.text + '</h1>'  
     return render_template('index.html',form = form)
 #################################################################################################################################################
 
