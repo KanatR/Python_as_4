@@ -8,7 +8,7 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy  import SQLAlchemy
 from sqlalchemy import create_engine, false, null, select, Table, Column, Integer, String, MetaData, ForeignKey
 import requests
-
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask (__name__)
 
@@ -16,7 +16,9 @@ app = Flask (__name__)
 app.config['SECRET_KEY'] = 'any secret string'
 Bootstrap(app)
 
-
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 
 meta = MetaData()
@@ -37,7 +39,11 @@ meta.create_all(engine)
 conn = engine.connect()
 
 
-
+@login_manager.user_loader
+def load_user(user_id):
+    user_user_query = users.select(user_id)
+    result4 = conn.execute(user_user_query)
+    return result4
 
 class LoginForm(FlaskForm):
     username = StringField('username',validators = [InputRequired(),Length(min=4,max=15)])
@@ -81,7 +87,9 @@ def signup():
 
 
 @app.route('/index',methods = ['GET','POST'])    
+@login_required
 def index():
+   
     form = IndexForm()
     if form.validate_on_submit():
         #nft_address_query = nft.select().where(nft.c.address == form.address.data ) 
