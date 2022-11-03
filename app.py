@@ -28,7 +28,7 @@ users = Table ( 'users', meta,
     Column('username', String(250),nullable = false),
     Column('password', String(250),nullable = false)
 )
-nft = Table ( 'nft', meta,
+nft = Table ( 'nft', meta,#UserMixin,
     Column('nft_id', Integer,primary_key = True ),
     Column('address', String(250),nullable = false),
     Column('info', String(1000),nullable = false)
@@ -40,8 +40,8 @@ conn = engine.connect()
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    user_user_query = users.select(user_id)
+def load_user(result4):
+    user_user_query = users.select(user_id).where(users.c.username == form.username.data)
     result4 = conn.execute(user_user_query)
     return result4
 
@@ -87,7 +87,7 @@ def signup():
 
 
 @app.route('/index',methods = ['GET','POST'])    
-@login_required
+#@login_required
 def index():
    
     form = IndexForm()
